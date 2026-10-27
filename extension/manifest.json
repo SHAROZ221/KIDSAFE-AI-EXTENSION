@@ -1,0 +1,67 @@
+{
+  "manifest_version": 3,
+  "name": "KidSafe AI - Safe Web & Parental Control",
+  "version": "1.0.0",
+  "description": "Agentic AI-Powered Parental Control Extension for Children (Manifest V3)",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "background": {
+    "service_worker": "background/service_worker.js",
+    "type": "module"
+  },
+  "permissions": [
+    "declarativeNetRequest",
+    "storage",
+    "webNavigation",
+    "tabs",
+    "alarms"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "declarative_net_request": {
+    "rule_resources": [
+      {
+        "id": "safesearch_rules",
+        "enabled": true,
+        "path": "rules/safesearch.json"
+      }
+    ]
+  },
+  "action": {
+    "default_popup": "pages/popup.html",
+    "default_title": "KidSafe AI Parental Control",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content/content_script.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "pages/block.html",
+        "pages/block.css",
+        "pages/block.js",
+        "icons/*"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ]
+}

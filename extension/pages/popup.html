@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KidSafe AI</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo-group">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <path d="M9 12l2 2 4-4"/>
+          </svg>
+        </div>
+        <div>
+          <h2>KidSafe AI</h2>
+          <span class="subtext">Smart Child Protection</span>
+        </div>
+      </div>
+      <div class="status-indicator" id="statusPill">Active</div>
+    </header>
+
+    <!-- Child View (Default / Locked) -->
+    <div id="childView" class="view-section">
+      <div class="status-card">
+        <div class="card-metric">
+          <span class="metric-label">Active Profile</span>
+          <span class="metric-value" id="viewProfileName">Junior</span>
+          <span class="metric-desc" id="viewProfileRange">Ages 9–12</span>
+        </div>
+        <div class="card-metric">
+          <span class="metric-label">Time Remaining</span>
+          <span class="metric-value time-val" id="viewTimeRemaining">--</span>
+          <span class="metric-desc" id="viewTimeUsed">-- used today</span>
+        </div>
+      </div>
+
+      <div class="feature-badges">
+        <div class="badge-item active">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+          SafeSearch Enforced
+        </div>
+        <div class="badge-item active">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+          Incognito Guard
+        </div>
+      </div>
+
+      <!-- PIN Unlock trigger -->
+      <div class="pin-prompt-box">
+        <p class="pin-label">Parent Controls</p>
+        <div class="pin-input-group">
+          <input type="password" id="popupPinInput" maxlength="6" placeholder="Enter PIN">
+          <button class="btn btn-primary" id="btnUnlockParent">Unlock</button>
+        </div>
+        <div class="error-msg hidden" id="popupPinError">Incorrect PIN</div>
+        <p class="pin-hint">Default PIN is <strong>1234</strong></p>
+      </div>
+    </div>
+
+    <!-- Parent Controls View (Unlocked with PIN) -->
+    <div id="parentView" class="view-section hidden">
+      <div class="parent-banner">
+        <span>Parent Control Panel</span>
+        <button class="btn-text" id="btnLockParent">Lock</button>
+      </div>
+
+      <div class="tab-nav">
+        <button class="tab-btn active" data-tab="tabProfile">Profile</button>
+        <button class="tab-btn" data-tab="tabRequests">Requests (<span id="reqCount">0</span>)</button>
+        <button class="tab-btn" data-tab="tabRules">Rules</button>
+        <button class="tab-btn" data-tab="tabSettings">Settings</button>
+      </div>
+
+      <!-- Tab: Profile & Time -->
+      <div class="tab-content active" id="tabProfile">
+        <div class="form-group">
+          <label>Child Age Profile</label>
+          <select id="selectProfile">
+            <option value="little_explorer">Little Explorer (5–8 yrs - Allowlist only)</option>
+            <option value="junior">Junior (9–12 yrs - Safe categories)</option>
+            <option value="teen">Teen (13–17 yrs - Blocklist & AI)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Daily Screen Time Limit (Minutes)</label>
+          <div class="inline-input">
+            <input type="number" id="inputTimeLimit" min="15" max="600" step="15" value="120">
+            <button class="btn btn-secondary" id="btnSaveTimeLimit">Save</button>
+          </div>
+        </div>
+
+        <div class="form-group row-between">
+          <span>Protection Shield</span>
+          <button class="btn btn-toggle" id="btnToggleProtection">Active</button>
+        </div>
+
+        <div class="form-group">
+          <button class="btn btn-secondary w-100" id="btnResetTimeToday">Reset Today's Time Counter</button>
+        </div>
+      </div>
+
+      <!-- Tab: Pending Requests -->
+      <div class="tab-content" id="tabRequests">
+        <div id="requestsList" class="items-list">
+          <!-- Populated dynamically -->
+          <div class="empty-notice">No pending access requests.</div>
+        </div>
+      </div>
+
+      <!-- Tab: Custom Rules -->
+      <div class="tab-content" id="tabRules">
+        <div class="form-group">
+          <label>Add Custom Domain Rule</label>
+          <div class="inline-input">
+            <input type="text" id="inputDomainRule" placeholder="example.com">
+            <select id="selectRuleType">
+              <option value="allow">Allow</option>
+              <option value="block">Block</option>
+            </select>
+          </div>
+          <button class="btn btn-primary w-100 mt-2" id="btnAddRule">Add Rule</button>
+        </div>
+
+        <div class="rules-section">
+          <h4>Custom Allowed Domains</h4>
+          <div id="allowlistContainer" class="tag-cloud"></div>
+
+          <h4 class="mt-2">Custom Blocked Domains</h4>
+          <div id="blocklistContainer" class="tag-cloud"></div>
+        </div>
+      </div>
+
+      <!-- Tab: Settings -->
+      <div class="tab-content" id="tabSettings">
+        <div class="form-group">
+          <label>Change Parent PIN</label>
+          <input type="password" id="inputOldPin" placeholder="Current PIN" class="mb-2">
+          <input type="password" id="inputNewPin" placeholder="New PIN (e.g. 1234)">
+          <button class="btn btn-primary w-100 mt-2" id="btnChangePin">Update PIN</button>
+          <div class="error-msg hidden" id="pinChangeError"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

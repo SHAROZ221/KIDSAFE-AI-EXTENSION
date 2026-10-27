@@ -126,7 +126,7 @@ The system consists of three main parts:
 - **Purpose:** Decides whether an unknown page is appropriate for the child's age profile.
 - **Inputs:** URL, domain, title, meta description, extracted visible text (truncated), child age profile, category settings.
 - **Output Schema:**
-```json
+```jso
 {
   "verdict": "allow | block | ask_parent",
   "confidence": 0.0,

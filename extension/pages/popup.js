@@ -23,6 +23,8 @@ function renderChildView() {
   const viewProfileRange = document.getElementById("viewProfileRange");
   const viewTimeRemaining = document.getElementById("viewTimeRemaining");
   const viewTimeUsed = document.getElementById("viewTimeUsed");
+  const badgePairingStatus = document.getElementById("badgePairingStatus");
+  const textPairingStatus = document.getElementById("textPairingStatus");
 
   if (!currentState.isProtectionActive) {
     statusPill.textContent = "Paused";
@@ -44,6 +46,15 @@ function renderChildView() {
 
   viewTimeRemaining.textContent = `${remainingMinutes}m left`;
   viewTimeUsed.textContent = `${usedMinutes}m of ${limitMinutes}m used`;
+
+  // Pairing indicator
+  if (currentState.isPaired) {
+    badgePairingStatus.classList.add("active");
+    textPairingStatus.textContent = `Paired: ${currentState.pairedProfileName || "Parent"}`;
+  } else {
+    badgePairingStatus.classList.remove("active");
+    textPairingStatus.textContent = "Standalone Mode (Unpaired)";
+  }
 }
 
 function renderParentView() {
@@ -68,6 +79,25 @@ function renderParentView() {
   const requests = currentState.pendingRequests || [];
   reqCount.textContent = requests.length;
   renderRequests(requests);
+
+  // Settings tab: Pairing
+  const unpairedSection = document.getElementById("unpairedSection");
+  const pairedSection = document.getElementById("pairedSection");
+  const pairedProfileLabel = document.getElementById("pairedProfileLabel");
+  const inputBackendUrl = document.getElementById("inputBackendUrl");
+
+  if (currentState.backendUrl) {
+    inputBackendUrl.value = currentState.backendUrl;
+  }
+
+  if (currentState.isPaired) {
+    unpairedSection.classList.add("hidden");
+    pairedSection.classList.remove("hidden");
+    pairedProfileLabel.textContent = currentState.pairedProfileName || "Child";
+  } else {
+    pairedSection.classList.add("hidden");
+    unpairedSection.classList.remove("hidden");
+  }
 
   // Rules tab
   renderRules();
@@ -251,6 +281,59 @@ function setupEventListeners() {
         listType: ruleType
       });
       domainInput.value = "";
+      await loadStateAndRender();
+    }
+  });
+
+  // Pairing actions
+  const btnPairDevice = document.getElementById("btnPairDevice");
+  const inputPairCode = document.getElementById("inputPairCode");
+  const pairError = document.getElementById("pairError");
+  const btnSyncNow = document.getElementById("btnSyncNow");
+  const btnUnpairDevice = document.getElementById("btnUnpairDevice");
+
+  btnPairDevice?.addEventListener("click", async () => {
+    const code = inputPairCode.value.trim();
+    const backendUrl = document.getElementById("inputBackendUrl").value.trim();
+    pairError.classList.add("hidden");
+
+    if (!code || code.length !== 6) {
+      pairError.textContent = "Please enter the 6-digit pairing code.";
+      pairError.classList.remove("hidden");
+      return;
+    }
+
+    btnPairDevice.disabled = true;
+    btnPairDevice.textContent = "Connecting...";
+
+    const res = await chrome.runtime.sendMessage({
+      type: "PAIR_DEVICE",
+      pairingCode: code,
+      backendUrl
+    });
+
+    btnPairDevice.disabled = false;
+    btnPairDevice.textContent = "Connect";
+
+    if (res && res.success) {
+      alert(`Successfully paired with profile: ${res.profileName}!`);
+      await loadStateAndRender();
+    } else {
+      pairError.textContent = res.error || "Pairing failed. Check code or server status.";
+      pairError.classList.remove("hidden");
+    }
+  });
+
+  btnSyncNow?.addEventListener("click", async () => {
+    btnSyncNow.textContent = "Syncing...";
+    await chrome.runtime.sendMessage({ type: "SYNC_NOW" });
+    await loadStateAndRender();
+    btnSyncNow.textContent = "Sync Now";
+  });
+
+  btnUnpairDevice?.addEventListener("click", async () => {
+    if (confirm("Are you sure you want to unpair this browser from the parent dashboard?")) {
+      await chrome.runtime.sendMessage({ type: "UNPAIR_DEVICE" });
       await loadStateAndRender();
     }
   });

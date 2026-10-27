@@ -21,3 +21,7 @@ desktop.ini
 
 # Chrome extension metadata
 _metadata/
+
+# SQLite databases
+*.db
+*.sqlite3

@@ -49,6 +49,10 @@
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
           Incognito Guard
         </div>
+        <div class="badge-item" id="badgePairingStatus">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          <span id="textPairingStatus">Standalone Mode</span>
+        </div>
       </div>
 
       <!-- PIN Unlock trigger -->
@@ -140,6 +144,28 @@
       <!-- Tab: Settings -->
       <div class="tab-content" id="tabSettings">
         <div class="form-group">
+          <label>Pair with Parent Dashboard</label>
+          <div id="unpairedSection">
+            <input type="text" id="inputBackendUrl" placeholder="http://localhost:8000" value="http://localhost:8000" class="mb-2">
+            <div class="inline-input">
+              <input type="text" id="inputPairCode" placeholder="6-digit code" maxlength="6">
+              <button class="btn btn-primary" id="btnPairDevice">Connect</button>
+            </div>
+            <p class="pin-hint">Generate code in Parent Web Dashboard</p>
+          </div>
+          <div id="pairedSection" class="hidden">
+            <div class="badge-item active mb-2" style="background:#ecfdf5;color:#065f46;">
+              Connected to Profile: <strong id="pairedProfileLabel" style="margin-left:4px;">Child</strong>
+            </div>
+            <div class="inline-input">
+              <button class="btn btn-secondary" id="btnSyncNow" style="flex:1;">Sync Now</button>
+              <button class="btn btn-text" id="btnUnpairDevice">Unpair</button>
+            </div>
+          </div>
+          <div class="error-msg hidden" id="pairError"></div>
+        </div>
+
+        <div class="form-group mt-2">
           <label>Change Parent PIN</label>
           <input type="password" id="inputOldPin" placeholder="Current PIN" class="mb-2">
           <input type="password" id="inputNewPin" placeholder="New PIN (e.g. 1234)">

@@ -7,53 +7,67 @@ KidSafe AI is a cross-browser extension (Manifest V3) for standard web browsers 
 
 ## 🚀 Phase 1: Extension Core & Interception (Complete)
 
-Phase 1 provides the core browser extension shell and real-time request filtering engine.
-
-### Features Implemented
-- **Manifest V3 Architecture**: Clean background service worker and content scripts compliant with modern Chromium standards.
-- **DeclarativeNetRequest Rules**: Forced SafeSearch enforced automatically on **Google**, **Bing**, **DuckDuckGo**, and **YouTube** (Restricted Mode).
-- **Navigation Interception Engine**: Evaluates web traffic in real time against policy layers before rendering.
-- **Three Age Profiles**:
-  - **Little Explorer (5–8 yrs)**: Strict allowlist only (e.g., PBS Kids, National Geographic Kids, Scratch, Khan Academy).
-  - **Junior (9–12 yrs)**: Hybrid allowlist + safe categories; restricts adult, gambling, and violent content.
-  - **Teen (13–17 yrs)**: Blocklist + AI classification; allows broader exploration while protecting against harmful content.
-- **Kid-Friendly Block Page (`pages/block.html`)**:
-  - Reassuring, age-appropriate explanations instead of harsh error messages.
-  - Interactive **"Ask Parent to Unlock"** button allowing children to send an access request with a personal note.
-  - **On-the-spot Parent PIN unlock** so a parent present with the child can instantly review and whitelist a site.
-- **Parent-Locked Popup Controller (`pages/popup.html`)**:
-  - Glance view for the child: active profile, screen time left today, protection status.
-  - Protected by a **4-digit Parent PIN** (default: `1234`).
-  - Parent panel for profile switching, daily time limits, approving pending requests, and custom allow/block rules.
-- **Screen Time Manager**:
-  - Real-time time remaining badge on extension icon.
-  - Automatically redirects tabs to a timeout page when the daily allowance expires.
+- **Manifest V3 Architecture**: Background service worker, declarative rules, and content script.
+- **Forced SafeSearch**: Enforced on Google, Bing, DuckDuckGo, and YouTube (Restricted Mode).
+- **Three Age Profiles**: Little Explorer (5–8 yrs), Junior (9–12 yrs), and Teen (13–17 yrs).
+- **Child-Friendly Block Page (`pages/block.html`)**: Friendly reasoning, "Ask Parent to Unlock" request button, and instant PIN unlock.
+- **Parent Popup Panel (`pages/popup.html`)**: Real-time screen time badge, profile switcher, and 4-digit Parent PIN lock (default: `1234`).
 
 ---
 
-## 🛠️ How to Load the Extension in Chrome / Edge / Brave
+## 🌐 Phase 2: Parent Control & Remote Dashboard (Complete)
 
-1. Open your browser and navigate to:
-   - **Chrome**: `chrome://extensions`
-   - **Edge**: `edge://extensions`
-   - **Brave**: `brave://extensions`
-2. Enable **Developer mode** (toggle in the top-right corner).
-3. Click **Load unpacked**.
-4. Select the folder: `C:\CHILDSAFE\extension`.
-5. The **KidSafe AI** icon will appear in your browser toolbar!
+Phase 2 introduces the centralized **FastAPI Backend Service** and the **Parent Web Dashboard** for remote management from any browser or smartphone.
+
+### Key Capabilities
+1. **Authentication & Multi-Child Profiles**:
+   - Secure parent registration and login using JWT tokens and salted bcrypt password hashes.
+   - Support for managing multiple children with customized age tiers and daily screen time limits.
+2. **One-Time 6-Digit Device Pairing**:
+   - Generate temporary pairing codes in the Parent Dashboard.
+   - Pair an installed browser extension by entering the code in the extension popup.
+   - Automatically issues a secure `device_token` for encrypted synchronization.
+3. **Remote Policy Sync (`/api/sync`)**:
+   - Background sync loop propagates parent rule changes, tier updates, and screen time adjustments to all paired child browsers every 30 seconds.
+4. **Interactive Approval Workflow**:
+   - When a child requests access from a blocked page, the request appears in real time on the parent's dashboard.
+   - 1-click **Approve** immediately migrates the domain into the child's custom allowlist.
+5. **Activity & Safety Logging**:
+   - Blocked navigation attempts and high-risk triggers are logged to the backend for parents to review in the Activity feed.
 
 ---
 
-## 🧪 Testing Phase 1 Core
+## 💻 Running the Parent Dashboard & Backend
 
-To run the automated verification test suite:
-```powershell
-node tests/test_extension_core.js
-```
-*(All 16 unit tests for manifest compliance, SafeSearch, PIN hashing, profile logic, and parent overrides pass).*
+1. **Start the FastAPI Backend**:
+   ```powershell
+   cd C:\CHILDSAFE\backend
+   python -m uvicorn main:app --reload --port 8000
+   ```
+2. **Open the Parent Dashboard**:
+   - Navigate to: `http://localhost:8000`
+   - Create an account or sign in.
+3. **Pair the Browser Extension**:
+   - In the dashboard, click **Pair Browser** &rarr; **Generate 6-Digit Code**.
+   - In your browser, open the KidSafe AI extension popup, unlock with PIN (`1234`), go to **Settings**, enter the 6-digit code, and click **Connect**.
 
 ---
 
-## 🔮 Next: Phase 2
-- **Backend Service (FastAPI)**: Authentication, pairing tokens, REST endpoints for approval requests and remote policy sync.
-- **Parent Web Dashboard**: Remote browser panel for parents to manage multiple child devices from any phone or laptop.
+## 🧪 Automated Test Suites
+
+- **Extension Core Tests (Phase 1)**:
+  ```powershell
+  node tests/test_extension_core.js
+  ```
+- **Backend & Pairing Tests (Phase 2)**:
+  ```powershell
+  python tests/test_phase2_backend.py
+  ```
+
+---
+
+## 🔮 Next: Phase 3
+- **AI Agent Integration**:
+  - LLM Page Classifier Agent (`allow` | `block` | `ask_parent`) for unclassified domains using extracted DOM metadata.
+  - Plain-language child explanations generated by AI.
+  - Natural-language rule assistant for parents.

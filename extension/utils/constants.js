@@ -106,5 +106,8 @@ export const DEFAULT_STATE = {
   customBlocklist: [],
   pendingRequests: [],
   verdictCache: {},
-  backendUrl: "http://localhost:8000"
+  backendUrl: "http://localhost:8000",
+  deviceToken: null,
+  isPaired: false,
+  pairedProfileName: null
 };

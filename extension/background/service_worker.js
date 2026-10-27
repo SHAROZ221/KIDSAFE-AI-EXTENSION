@@ -24,14 +24,60 @@ function setupAlarms() {
       chrome.alarms.create("screenTimeTracker", { periodInMinutes: 1 });
     }
   });
+
+  chrome.alarms.get("backendSyncAlarm", (alarm) => {
+    if (!alarm) {
+      chrome.alarms.create("backendSyncAlarm", { periodInMinutes: 0.5 }); // Sync every 30 seconds
+    }
+  });
 }
 
 // Alarm listener
 chrome.alarms.onAlarm.addListener(async (alarm) => {
   if (alarm.name === "screenTimeTracker") {
     await handleScreenTimeTick();
+  } else if (alarm.name === "backendSyncAlarm") {
+    await performBackendSync();
   }
 });
+
+// Periodic Sync with Parent Dashboard Backend
+async function performBackendSync() {
+  const state = await getStorageState();
+  if (!state.isPaired || !state.deviceToken) return;
+
+  const backendUrl = state.backendUrl || "http://localhost:8000";
+
+  try {
+    const res = await fetch(`${backendUrl}/api/sync`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        device_token: state.deviceToken,
+        time_used_today_seconds: state.timeUsedTodaySeconds
+      })
+    });
+
+    if (!res.ok) return;
+
+    const data = await res.json();
+    if (data.success) {
+      // Merge remote rules into local state
+      const updates = {
+        activeProfile: data.tier || state.activeProfile,
+        dailyTimeLimitMinutes: data.daily_time_limit_minutes || state.dailyTimeLimitMinutes,
+        isProtectionActive: data.is_protection_active !== undefined ? data.is_protection_active : state.isProtectionActive,
+        customAllowlist: data.custom_allowlist || state.customAllowlist,
+        customBlocklist: data.custom_blocklist || state.customBlocklist
+      };
+
+      await setStorageState(updates);
+      updateBadge({ ...state, ...updates });
+    }
+  } catch (err) {
+    // Backend temporarily unreachable; continue with local cached rules (FR-B7)
+  }
+}
 
 // Handle 1-minute time ticks
 async function handleScreenTimeTick() {
@@ -148,6 +194,26 @@ chrome.webNavigation.onBeforeNavigate.addListener(async (details) => {
 
   if (evaluation.verdict === "block") {
     console.log(`[KidSafe AI] Blocked: ${url} (Reason: ${evaluation.reason})`);
+    
+    // Log to backend if paired
+    if (state.isPaired && state.deviceToken) {
+      const backendUrl = state.backendUrl || "http://localhost:8000";
+      fetch(`${backendUrl}/api/logs`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Device-Token": state.deviceToken
+        },
+        body: JSON.stringify({
+          url,
+          domain: extractHostname(url),
+          action: "blocked",
+          reason: evaluation.reason || "blocked",
+          category: evaluation.category || "safety"
+        })
+      }).catch(() => {});
+    }
+
     const blockUrl = chrome.runtime.getURL(
       `pages/block.html?url=${encodeURIComponent(url)}&reason=${encodeURIComponent(evaluation.reason || "blocked")}&explanation=${encodeURIComponent(evaluation.explanation || "")}&profile=${encodeURIComponent(state.activeProfile)}`
     );
@@ -244,7 +310,77 @@ async function handleRuntimeMessage(message, sender) {
 
       const pendingRequests = [newRequest, ...(state.pendingRequests || [])].slice(0, 50);
       await setStorageState({ pendingRequests });
+
+      // Forward to backend if paired
+      if (state.isPaired && state.deviceToken) {
+        const backendUrl = state.backendUrl || "http://localhost:8000";
+        fetch(`${backendUrl}/api/requests`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Device-Token": state.deviceToken
+          },
+          body: JSON.stringify({
+            url,
+            domain: hostname,
+            reason: reason || "Child requested access from block page."
+          })
+        }).catch(() => {});
+      }
+
       return { success: true, request: newRequest };
+    }
+
+    case "PAIR_DEVICE": {
+      const { pairingCode, backendUrl } = message;
+      const targetBackend = backendUrl || state.backendUrl || "http://localhost:8000";
+
+      try {
+        const res = await fetch(`${targetBackend}/api/devices/pair`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            pairing_code: pairingCode,
+            device_name: "Child Browser",
+            browser: "Chrome"
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          return { success: false, error: data.detail || "Pairing failed." };
+        }
+
+        await setStorageState({
+          isPaired: true,
+          deviceToken: data.device_token,
+          pairedProfileName: data.profile_name,
+          activeProfile: data.tier,
+          dailyTimeLimitMinutes: data.daily_time_limit_minutes,
+          backendUrl: targetBackend
+        });
+
+        // Trigger immediate sync
+        await performBackendSync();
+        return { success: true, profileName: data.profile_name };
+      } catch (err) {
+        return { success: false, error: "Cannot reach backend server at " + targetBackend };
+      }
+    }
+
+    case "UNPAIR_DEVICE": {
+      await setStorageState({
+        isPaired: false,
+        deviceToken: null,
+        pairedProfileName: null
+      });
+      return { success: true };
+    }
+
+    case "SYNC_NOW": {
+      await performBackendSync();
+      const updated = await getStorageState();
+      return { success: true, state: updated };
     }
 
     case "APPROVE_REQUEST": {

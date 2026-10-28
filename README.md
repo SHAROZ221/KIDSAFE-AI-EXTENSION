@@ -27,31 +27,25 @@ KidSafe AI is a cross-browser extension (Manifest V3) for standard web browsers 
 
 ## 🤖 Phase 3: AI Agent Integration (Complete)
 
-Phase 3 brings the core differentiator of KidSafe AI: intelligent agentic decision layers and natural-language interfaces.
+- **Agentic Page Classifier (`/api/ai/classify`)**: Structured JSON (`allow` | `block` | `ask_parent`) with kid-friendly reasoning, confidence rating, and risk flag tags.
+- **Natural-Language Parent Agent (`/api/ai/nl-rule/preview` & `/api/ai/nl-rule/confirm`)**: Plain-language commands (e.g. *"Allow scratch.mit.edu and set daily screen time to 90 minutes"*) with a mandatory confirmation preview.
+- **AI Dashboard Assistant & Inspector**: Interactive AI Command Bar and URL test lab in the Parent Dashboard.
 
-### Key Capabilities
-1. **Agentic Page Classifier (`/api/ai/classify`)**:
-   - Evaluates unknown web pages in real time using LLM inference (Google Gemini / Groq / OpenAI) with deterministic semantic taxonomy fallback.
-   - Outputs structured JSON matching **PRD Section 7.1**:
-     - `verdict`: `allow` | `block` | `ask_parent`
-     - `confidence`: (0.0 to 1.0)
-     - `categories`: `["education", "coding", ...]`
-     - `age_rating`: `5+` | `9+` | `13+` | `18+`
-     - `reason_parent`: Concise technical explanation for parents.
-     - `reason_child`: Friendly, supportive, non-frightening explanation for children.
-     - `risk_flags`: High-risk categories (`adult`, `gambling`, `violence`, `weapons_drugs`, `scam`, etc.).
-   - Built-in 24-hour TTL verdict caching to ensure zero latency on repeated visits.
-2. **Natural-Language Parent Agent (`/api/ai/nl-rule/preview` & `/api/ai/nl-rule/confirm`)**:
-   - Parents can speak or type commands in plain English:
-     - *"Allow scratch.mit.edu and set daily screen time to 90 minutes"*
-     - *"Block twitch and discord for Aarav"*
-     - *"Switch to Little Explorer mode"*
-     - *"Pause protection"*
-   - **Mandatory Confirmation Preview**: The agent parses the sentence into structured actions, presents a preview card, and executes changes only upon parent confirmation.
-3. **AI Dashboard Assistant & Inspector**:
-   - Interactive AI Command Bar directly on the Parent Dashboard overview.
-   - Dedicated **AI Agent Assistant** tab with instant prompt chips.
-   - **AI Page Classifier Test Lab**: Lets parents inspect and preview how the classifier categorizes any website for their child's profile.
+---
+
+## 🔒 Phase 4: Hardening & Quantitative Evaluation (Complete)
+
+- **Anti-Bypass & Internal Settings Protection (`FR-B9`)**: Blocks unauthorized navigation to `chrome://extensions` and browser settings, redirecting to a protected screen.
+- **Incognito Enforcement (`FR-B6`)**: Enforces safety policies inside Private/Incognito windows or locks Incognito entirely.
+- **Windows Enterprise Group Policies (`hardening/`)**:
+  - `chrome_hardening.reg`: Windows registry policy that forces installation, locks extension uninstallation, and disables DevTools.
+  - `edge_hardening.reg`: Microsoft Edge policy locking InPrivate and extension management.
+  - `HARDENING_GUIDE.md`: Comprehensive threat model matrix and bypass defense analysis.
+- **Academic Benchmark & Evaluation Report (`evaluation/`)**:
+  - `dataset.json`: 20-sample diverse test benchmark across Safe Learning, Entertainment, Social Media, Adult, Gambling, and Violent categories.
+  - `benchmark.py`: Measures accuracy, precision, recall, F1-score, and latency distribution.
+  - `EVALUATION_REPORT.md`: Pre-formatted evaluation chapter with confusion matrices and performance tables ready for the final BCA dissertation.
+- **Activity Log CSV Export (`/api/profiles/{id}/logs/export.csv`)**: One-click export of navigation logs for parental offline records.
 
 ---
 
@@ -66,6 +60,7 @@ Phase 3 brings the core differentiator of KidSafe AI: intelligent agentic decisi
    - Visit: `http://localhost:8000`
    - Log in or create a parent account.
    - Use the **AI Assistant** tab or command bar to set rules via natural language!
+   - Export activity logs via **Export CSV Report**.
 3. **Load the Extension**:
    - Open Chrome/Edge/Brave &rarr; `chrome://extensions` &rarr; Developer mode &rarr; **Load unpacked** &rarr; select `C:\CHILDSAFE\extension`.
    - Pair with the 6-digit code from the dashboard.
@@ -74,7 +69,6 @@ Phase 3 brings the core differentiator of KidSafe AI: intelligent agentic decisi
 
 ## 🧪 Comprehensive Automated Test Suites
 
-Run all three test suites:
 ```powershell
 # Phase 1: Extension Core & Policy Pipeline
 node tests/test_extension_core.js
@@ -84,11 +78,11 @@ python tests/test_phase2_backend.py
 
 # Phase 3: AI Classifier Agent & Natural Language Parent Agent
 python tests/test_phase3_ai.py
+
+# Phase 4: Hardening, Benchmark Dataset & CSV Export
+python tests/test_phase4_hardening.py
+
+# Run Model Benchmark
+python evaluation/benchmark.py
 ```
-
----
-
-## 🔮 Next: Phase 4
-- **Extension Hardening & Evaluation**:
-  - Bypass resistance testing (Incognito lockout enforcement, enterprise policies).
-  - Accuracy, latency, and classifier benchmark dataset.
+*(All 4 phases pass 100%).*

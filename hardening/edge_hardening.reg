@@ -1,0 +1,13 @@
+Windows Registry Editor Version 5.00
+
+; KidSafe AI - Microsoft Edge Enterprise Hardening Policy
+; This policy blocks Developer Tools, prevents extension removal,
+; and disables unmonitored InPrivate browsing.
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Edge]
+"DeveloperToolsAvailability"=dword:00000002
+"InPrivateModeAvailability"=dword:00000001
+
+; Force install KidSafe AI in Microsoft Edge
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Edge\ExtensionInstallForcelist]
+"1"="kidsafe_ai_extension_id_here;https://edge.microsoft.com/extensionwebstorebase/v1/crx"

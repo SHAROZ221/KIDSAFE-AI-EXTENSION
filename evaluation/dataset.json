@@ -1,0 +1,242 @@
+[
+  {
+    "url": "https://scratch.mit.edu/projects/123",
+    "title": "Scratch - Imagine, Program, Share",
+    "meta_description": "Create stories, games, and animations. Share with others around the world.",
+    "true_category": "education",
+    "true_age_rating": "5+",
+    "expected_verdicts": {
+      "little_explorer": "allow",
+      "junior": "allow",
+      "teen": "allow"
+    }
+  },
+  {
+    "url": "https://kids.nationalgeographic.com/animals",
+    "title": "National Geographic Kids",
+    "meta_description": "Play games, watch videos, learn about animals, and places around the world.",
+    "true_category": "education",
+    "true_age_rating": "5+",
+    "expected_verdicts": {
+      "little_explorer": "allow",
+      "junior": "allow",
+      "teen": "allow"
+    }
+  },
+  {
+    "url": "https://khanacademy.org/math/algebra",
+    "title": "Khan Academy - Free Online Courses, Lessons & Practice",
+    "meta_description": "Learn for free about math, art, computer programming, economics, physics, chemistry, biology, medicine, finance, history, and more.",
+    "true_category": "education",
+    "true_age_rating": "5+",
+    "expected_verdicts": {
+      "little_explorer": "allow",
+      "junior": "allow",
+      "teen": "allow"
+    }
+  },
+  {
+    "url": "https://pbskids.org/games",
+    "title": "PBS KIDS Games",
+    "meta_description": "Play free online learning games from your favorite PBS KIDS shows.",
+    "true_category": "kids_entertainment",
+    "true_age_rating": "5+",
+    "expected_verdicts": {
+      "little_explorer": "allow",
+      "junior": "allow",
+      "teen": "allow"
+    }
+  },
+  {
+    "url": "https://en.wikipedia.org/wiki/Solar_System",
+    "title": "Solar System - Wikipedia",
+    "meta_description": "The Solar System is the gravitationally bound system of the Sun and the objects that orbit it.",
+    "true_category": "education",
+    "true_age_rating": "9+",
+    "expected_verdicts": {
+      "little_explorer": "allow",
+      "junior": "allow",
+      "teen": "allow"
+    }
+  },
+  {
+    "url": "https://chess.com/play/computer",
+    "title": "Play Chess Online against the Computer",
+    "meta_description": "Practice chess against computer opponents from beginner to master level.",
+    "true_category": "gaming",
+    "true_age_rating": "9+",
+    "expected_verdicts": {
+      "little_explorer": "ask_parent",
+      "junior": "allow",
+      "teen": "allow"
+    }
+  },
+  {
+    "url": "https://coolmathgames.com",
+    "title": "Cool Math Games - Free Online Math Games, Cool Puzzles",
+    "meta_description": "Coolmath Games is a brain-training site, for everyone, where logic & thinking & math meets fun & games.",
+    "true_category": "education",
+    "true_age_rating": "5+",
+    "expected_verdicts": {
+      "little_explorer": "allow",
+      "junior": "allow",
+      "teen": "allow"
+    }
+  },
+  {
+    "url": "https://reddit.com/r/gaming",
+    "title": "Reddit - Gaming Community",
+    "meta_description": "A subreddit for (almost) anything related to games - video games, board games, classic games, and more.",
+    "true_category": "social_media",
+    "true_age_rating": "13+",
+    "expected_verdicts": {
+      "little_explorer": "ask_parent",
+      "junior": "ask_parent",
+      "teen": "allow"
+    }
+  },
+  {
+    "url": "https://discord.com/channels/@me",
+    "title": "Discord - Group Chat That's All Fun & Games",
+    "meta_description": "Discord is great for playing games and chilling with friends, or even building a worldwide community.",
+    "true_category": "social_media",
+    "true_age_rating": "13+",
+    "expected_verdicts": {
+      "little_explorer": "ask_parent",
+      "junior": "ask_parent",
+      "teen": "allow"
+    }
+  },
+  {
+    "url": "https://twitch.tv/directory",
+    "title": "Twitch - Live Game Streaming",
+    "meta_description": "Twitch is the world's leading live streaming platform for gamers and the things we love.",
+    "true_category": "gaming",
+    "true_age_rating": "13+",
+    "expected_verdicts": {
+      "little_explorer": "ask_parent",
+      "junior": "allow",
+      "teen": "allow"
+    }
+  },
+  {
+    "url": "https://roblox.com/games",
+    "title": "Discover Games - Roblox",
+    "meta_description": "Explore millions of user-created 3D experiences on Roblox.",
+    "true_category": "gaming",
+    "true_age_rating": "9+",
+    "expected_verdicts": {
+      "little_explorer": "ask_parent",
+      "junior": "allow",
+      "teen": "allow"
+    }
+  },
+  {
+    "url": "https://pornhub.com/video/search",
+    "title": "Pornhub - Free HD Porn Videos",
+    "meta_description": "Watch free porn videos and explicit adult content.",
+    "true_category": "adult",
+    "true_age_rating": "18+",
+    "expected_verdicts": {
+      "little_explorer": "block",
+      "junior": "block",
+      "teen": "block"
+    }
+  },
+  {
+    "url": "https://xvideos.com",
+    "title": "Xvideos - Adult Entertainment",
+    "meta_description": "Streaming adult movies and erotic clips.",
+    "true_category": "adult",
+    "true_age_rating": "18+",
+    "expected_verdicts": {
+      "little_explorer": "block",
+      "junior": "block",
+      "teen": "block"
+    }
+  },
+  {
+    "url": "https://chaturbate.com",
+    "title": "Chaturbate - Free Live Cams",
+    "meta_description": "Live adult webcam community.",
+    "true_category": "adult",
+    "true_age_rating": "18+",
+    "expected_verdicts": {
+      "little_explorer": "block",
+      "junior": "block",
+      "teen": "block"
+    }
+  },
+  {
+    "url": "https://stake.com/casino/games/slots",
+    "title": "Stake - Online Casino & Crypto Betting",
+    "meta_description": "Play slots, roulette, blackjack and live sports betting online with real money and cryptocurrency.",
+    "true_category": "gambling",
+    "true_age_rating": "18+",
+    "expected_verdicts": {
+      "little_explorer": "block",
+      "junior": "block",
+      "teen": "block"
+    }
+  },
+  {
+    "url": "https://bet365.com/sports",
+    "title": "bet365 - Sportsbook and Live Odds",
+    "meta_description": "One of the world's leading online gambling companies. Bet on sports and casino games.",
+    "true_category": "gambling",
+    "true_age_rating": "18+",
+    "expected_verdicts": {
+      "little_explorer": "block",
+      "junior": "block",
+      "teen": "block"
+    }
+  },
+  {
+    "url": "https://bestgore.com/video/brutal-accident",
+    "title": "BestGore - Shock Video Archive",
+    "meta_description": "Real life gore, executions, massacres, and fatal accident videos.",
+    "true_category": "violence_gore",
+    "true_age_rating": "18+",
+    "expected_verdicts": {
+      "little_explorer": "block",
+      "junior": "block",
+      "teen": "block"
+    }
+  },
+  {
+    "url": "https://darknet-drugs-marketplace.onion",
+    "title": "Darknet Market - Buy Drugs Online",
+    "meta_description": "Anonymous marketplace to buy cocaine, weed, prescription pills online.",
+    "true_category": "weapons_drugs",
+    "true_age_rating": "18+",
+    "expected_verdicts": {
+      "little_explorer": "block",
+      "junior": "block",
+      "teen": "block"
+    }
+  },
+  {
+    "url": "https://suicide-forum-methods.net",
+    "title": "Self Harm and Suicide Methods Discussion",
+    "meta_description": "Discussions on how to commit suicide and self harm techniques.",
+    "true_category": "violence_gore",
+    "true_age_rating": "18+",
+    "expected_verdicts": {
+      "little_explorer": "block",
+      "junior": "block",
+      "teen": "block"
+    }
+  },
+  {
+    "url": "https://duolingo.com/learn",
+    "title": "Duolingo - The world's best way to learn a language",
+    "meta_description": "Learn 30+ languages online with bite-size lessons based on science.",
+    "true_category": "education",
+    "true_age_rating": "5+",
+    "expected_verdicts": {
+      "little_explorer": "allow",
+      "junior": "allow",
+      "teen": "allow"
+    }
+  }
+]

@@ -1,0 +1,15 @@
+Windows Registry Editor Version 5.00
+
+; KidSafe AI - Google Chrome Enterprise Hardening Policy
+; This policy prevents children from disabling or uninstalling the extension,
+; disables Developer Tools, and enforces KidSafe AI protection in Incognito mode.
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Google\Chrome]
+"DeveloperToolsAvailability"=dword:00000002
+"IncognitoModeAvailability"=dword:00000001
+"BlockExternalExtensions"=dword:00000001
+
+; Force install KidSafe AI (prevent uninstallation)
+; Format: "<ExtensionID>;https://clients2.google.com/service/update2/crx"
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Google\Chrome\ExtensionInstallForcelist]
+"1"="kidsafe_ai_extension_id_here;https://clients2.google.com/service/update2/crx"

@@ -232,6 +232,28 @@ function setupActionListeners() {
     loadLogs();
   });
 
+  // Export CSV Report
+  document.getElementById("btnExportCsv")?.addEventListener("click", async () => {
+    if (!activeProfileId) return;
+    try {
+      const res = await fetch(`${API_BASE}/api/profiles/${activeProfileId}/logs/export.csv`, {
+        headers: { "Authorization": `Bearer ${authToken}` }
+      });
+      if (res.ok) {
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `kidsafe_activity_report.csv`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      }
+    } catch (err) {
+      console.error("Export CSV error:", err);
+    }
+  });
+
   // Modal: Add Child Profile
   const modal = document.getElementById("profileModal");
   document.getElementById("btnOpenNewProfileModal")?.addEventListener("click", () => {

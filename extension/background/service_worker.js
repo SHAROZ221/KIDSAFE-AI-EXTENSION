@@ -151,6 +151,24 @@ async function lockdownExpiredTabs() {
   }
 }
 
+// Anti-Bypass Monitor: Guard internal settings and extensions page (FR-B9)
+chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+  if (!changeInfo.url) return;
+  const targetUrl = changeInfo.url.toLowerCase();
+
+  // Detect attempts to access extension manager or browser settings
+  if (targetUrl.includes("://extensions") || targetUrl.includes("://settings")) {
+    const state = await getStorageState();
+    if (state.isProtectionActive) {
+      console.warn(`[KidSafe AI] Blocked settings access attempt: ${targetUrl}`);
+      const blockUrl = chrome.runtime.getURL(
+        `pages/block.html?reason=settings_access_restricted&url=${encodeURIComponent(targetUrl)}`
+      );
+      chrome.tabs.update(tabId, { url: blockUrl }).catch(() => {});
+    }
+  }
+});
+
 // Navigation Interceptor
 chrome.webNavigation.onBeforeNavigate.addListener(async (details) => {
   // Only intercept top-level navigation in the main frame

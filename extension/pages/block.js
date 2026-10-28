@@ -43,6 +43,10 @@ document.addEventListener("DOMContentLoaded", () => {
     titleTextEl.textContent = "Incognito Mode is Protected";
     friendlyExplanationEl.textContent = "Private or Incognito browsing is disabled by KidSafe AI to keep your online experience safe.";
     blockReasonEl.textContent = "Incognito Mode Blocked";
+  } else if (reason === "settings_access_restricted") {
+    titleTextEl.textContent = "Settings are Protected";
+    friendlyExplanationEl.textContent = "Access to browser extension settings is locked to prevent disabling KidSafe AI. Ask your parent for their PIN to unlock.";
+    blockReasonEl.textContent = "Settings Restricted";
   } else if (customExplanation) {
     friendlyExplanationEl.textContent = customExplanation;
     blockReasonEl.textContent = formatReason(reason);

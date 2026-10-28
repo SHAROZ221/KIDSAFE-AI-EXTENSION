@@ -138,6 +138,46 @@ export async function evaluateUrlPolicy(url, state) {
     }
   }
 
+  // 4. Query AI Classifier Service (Layer 4)
+  if (state.backendUrl) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2000); // 2s timeout for navigation
+
+      const aiRes = await fetch(`${state.backendUrl}/api/ai/classify`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          url,
+          age_profile: state.activeProfile || "junior"
+        }),
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+
+      if (aiRes.ok) {
+        const aiData = await aiRes.json();
+        const aiVerdict = {
+          verdict: aiData.verdict, // 'allow' or 'block' or 'ask_parent'
+          reason: aiData.verdict === "allow" ? "ai_approved" : "ai_classified_unsafe",
+          explanation: aiData.reason_child || "Evaluated by KidSafe AI.",
+          category: (aiData.categories && aiData.categories[0]) || "general",
+          confidence: aiData.confidence,
+          timestamp: Date.now()
+        };
+
+        // Cache in memory / storage
+        if (!state.verdictCache) state.verdictCache = {};
+        state.verdictCache[hostname] = aiVerdict;
+        chrome.storage.local.set({ verdictCache: state.verdictCache }).catch(() => {});
+
+        return aiVerdict;
+      }
+    } catch (e) {
+      // AI server unreachable; fallback to standard profile defaults (FR-B7)
+    }
+  }
+
   // Default fallback for safe web navigation
   return {
     verdict: "allow",

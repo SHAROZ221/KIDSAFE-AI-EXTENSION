@@ -145,3 +145,28 @@ class ActivityLogResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+# AI Agent Schemas (Phase 3)
+class ClassifyRequest(BaseModel):
+    url: str
+    title: Optional[str] = ""
+    meta_description: Optional[str] = ""
+    page_text_sample: Optional[str] = ""
+    age_profile: Optional[str] = "junior"
+
+class ClassifyResponse(BaseModel):
+    verdict: str # 'allow', 'block', 'ask_parent'
+    confidence: float
+    categories: List[str]
+    age_rating: str # '5+', '9+', '13+', '18+'
+    reason_parent: str
+    reason_child: str
+    risk_flags: List[str]
+
+class NLPreviewRequest(BaseModel):
+    profile_id: str
+    instruction: str
+
+class NLConfirmRequest(BaseModel):
+    profile_id: str
+    actions: List[dict]

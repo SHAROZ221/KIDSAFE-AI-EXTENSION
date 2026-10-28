@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from database import engine, Base
-from routers import auth_routes, profile_routes, pairing_routes, request_routes, sync_routes, log_routes
+from routers import auth_routes, profile_routes, pairing_routes, request_routes, sync_routes, log_routes, ai_routes
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
@@ -32,6 +32,7 @@ app.include_router(pairing_routes.router)
 app.include_router(request_routes.router)
 app.include_router(sync_routes.router)
 app.include_router(log_routes.router)
+app.include_router(ai_routes.router)
 
 # Mount static files for Parent Web Dashboard
 static_dir = os.path.join(os.path.dirname(__file__), "static")

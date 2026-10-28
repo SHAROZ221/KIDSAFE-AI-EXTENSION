@@ -101,6 +101,10 @@
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
           Custom Rules
         </button>
+        <button class="nav-item" data-view="viewAIAssistant">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>
+          AI Agent Assistant
+        </button>
         <button class="nav-item" data-view="viewPairing">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
           Pair Browser
@@ -137,6 +141,21 @@
 
       <!-- View 1: Overview -->
       <section class="view-panel active" id="viewOverview">
+        <!-- AI Quick Command Box -->
+        <div class="card mb-4 ai-banner-box">
+          <div class="ai-banner-content">
+            <div class="ai-badge">AI Assistant</div>
+            <h3>Manage rules with Natural Language</h3>
+            <p class="ai-subtitle">Type what you want to change, and the AI agent will configure the policies for you.</p>
+            <div class="ai-input-row">
+              <input type="text" id="overviewAiInput" placeholder="e.g. 'Allow khanacademy.org and set time to 90 mins'" class="input-control">
+              <button class="btn btn-primary" id="btnOverviewAiSend">Ask AI Agent</button>
+            </div>
+            <!-- AI Action Preview Container -->
+            <div id="overviewAiPreviewBox" class="ai-preview-card hidden"></div>
+          </div>
+        </div>
+
         <!-- Stat Cards -->
         <div class="metrics-grid">
           <div class="metric-card">
@@ -223,6 +242,54 @@
             </div>
             <div id="dashboardBlocklist" class="tag-cloud"></div>
           </div>
+        </div>
+      </section>
+
+      <!-- View: AI Assistant -->
+      <section class="view-panel" id="viewAIAssistant">
+        <div class="card max-w-700">
+          <div class="card-header">
+            <h3>Natural Language Rule Agent</h3>
+            <span class="status-badge approved">Agent Active</span>
+          </div>
+          <p class="card-desc">
+            Speak to the KidSafe AI agent in plain English. The agent converts your sentences into precise parental controls with a mandatory confirmation review before applying any changes.
+          </p>
+
+          <div class="ai-prompt-box">
+            <label>What would you like to set or change?</label>
+            <div class="ai-input-row mt-2">
+              <input type="text" id="assistantInput" placeholder="e.g. Block roblox and discord, and switch to teen profile" class="input-control">
+              <button class="btn btn-primary" id="btnAssistantSend">Preview Changes</button>
+            </div>
+            
+            <div class="example-chips mt-3">
+              <span class="chip-label">Try asking:</span>
+              <button class="chip-btn" data-prompt="Allow scratch.mit.edu and wikipedia.org">Allow learning sites</button>
+              <button class="chip-btn" data-prompt="Block twitch and kick.com">Block live streaming</button>
+              <button class="chip-btn" data-prompt="Set daily screen time to 90 minutes">Set 90m limit</button>
+              <button class="chip-btn" data-prompt="Switch to Little Explorer mode">Switch to Little Explorer</button>
+            </div>
+          </div>
+
+          <!-- Structured Action Preview Display -->
+          <div id="assistantPreviewContainer" class="ai-preview-card mt-4 hidden"></div>
+        </div>
+
+        <!-- AI Page Classifier Test Lab -->
+        <div class="card max-w-700 mt-4">
+          <div class="card-header">
+            <h3>AI Page Classifier Test Lab</h3>
+            <span class="status-badge pending">URL Inspector</span>
+          </div>
+          <p class="card-desc">
+            Test how the KidSafe AI Page Classifier evaluates any web link for your child's age profile.
+          </p>
+          <div class="ai-input-row">
+            <input type="text" id="testClassifyUrl" placeholder="https://example.com/article" class="input-control">
+            <button class="btn btn-secondary" id="btnRunClassification">Inspect URL</button>
+          </div>
+          <div id="classifierResultBox" class="classifier-output hidden mt-3"></div>
         </div>
       </section>
 

@@ -17,27 +17,45 @@ KidSafe AI is a cross-browser extension (Manifest V3) for standard web browsers 
 
 ## 🌐 Phase 2: Parent Control & Remote Dashboard (Complete)
 
-Phase 2 introduces the centralized **FastAPI Backend Service** and the **Parent Web Dashboard** for remote management from any browser or smartphone.
-
-### Key Capabilities
-1. **Authentication & Multi-Child Profiles**:
-   - Secure parent registration and login using JWT tokens and salted bcrypt password hashes.
-   - Support for managing multiple children with customized age tiers and daily screen time limits.
-2. **One-Time 6-Digit Device Pairing**:
-   - Generate temporary pairing codes in the Parent Dashboard.
-   - Pair an installed browser extension by entering the code in the extension popup.
-   - Automatically issues a secure `device_token` for encrypted synchronization.
-3. **Remote Policy Sync (`/api/sync`)**:
-   - Background sync loop propagates parent rule changes, tier updates, and screen time adjustments to all paired child browsers every 30 seconds.
-4. **Interactive Approval Workflow**:
-   - When a child requests access from a blocked page, the request appears in real time on the parent's dashboard.
-   - 1-click **Approve** immediately migrates the domain into the child's custom allowlist.
-5. **Activity & Safety Logging**:
-   - Blocked navigation attempts and high-risk triggers are logged to the backend for parents to review in the Activity feed.
+- **Authentication & Multi-Child Profiles**: Secure parent registration/login via JWT and bcrypt; manage multiple children with individual limits.
+- **6-Digit One-Time Device Pairing**: Temporary 6-digit codes to link extensions to child profiles without passwords.
+- **Remote Policy Sync (`/api/sync`)**: Background loop syncs parent rule modifications and time allowances every 30 seconds.
+- **Approval Workflow**: Unlock requests from children appear live on parent's dashboard; 1-click approvals automatically whitelist the domain.
+- **Safety Logs**: Full activity tracking of blocked risks and browsing events.
 
 ---
 
-## 💻 Running the Parent Dashboard & Backend
+## 🤖 Phase 3: AI Agent Integration (Complete)
+
+Phase 3 brings the core differentiator of KidSafe AI: intelligent agentic decision layers and natural-language interfaces.
+
+### Key Capabilities
+1. **Agentic Page Classifier (`/api/ai/classify`)**:
+   - Evaluates unknown web pages in real time using LLM inference (Google Gemini / Groq / OpenAI) with deterministic semantic taxonomy fallback.
+   - Outputs structured JSON matching **PRD Section 7.1**:
+     - `verdict`: `allow` | `block` | `ask_parent`
+     - `confidence`: (0.0 to 1.0)
+     - `categories`: `["education", "coding", ...]`
+     - `age_rating`: `5+` | `9+` | `13+` | `18+`
+     - `reason_parent`: Concise technical explanation for parents.
+     - `reason_child`: Friendly, supportive, non-frightening explanation for children.
+     - `risk_flags`: High-risk categories (`adult`, `gambling`, `violence`, `weapons_drugs`, `scam`, etc.).
+   - Built-in 24-hour TTL verdict caching to ensure zero latency on repeated visits.
+2. **Natural-Language Parent Agent (`/api/ai/nl-rule/preview` & `/api/ai/nl-rule/confirm`)**:
+   - Parents can speak or type commands in plain English:
+     - *"Allow scratch.mit.edu and set daily screen time to 90 minutes"*
+     - *"Block twitch and discord for Aarav"*
+     - *"Switch to Little Explorer mode"*
+     - *"Pause protection"*
+   - **Mandatory Confirmation Preview**: The agent parses the sentence into structured actions, presents a preview card, and executes changes only upon parent confirmation.
+3. **AI Dashboard Assistant & Inspector**:
+   - Interactive AI Command Bar directly on the Parent Dashboard overview.
+   - Dedicated **AI Agent Assistant** tab with instant prompt chips.
+   - **AI Page Classifier Test Lab**: Lets parents inspect and preview how the classifier categorizes any website for their child's profile.
+
+---
+
+## 💻 Running the Full System
 
 1. **Start the FastAPI Backend**:
    ```powershell
@@ -45,29 +63,32 @@ Phase 2 introduces the centralized **FastAPI Backend Service** and the **Parent 
    python -m uvicorn main:app --reload --port 8000
    ```
 2. **Open the Parent Dashboard**:
-   - Navigate to: `http://localhost:8000`
-   - Create an account or sign in.
-3. **Pair the Browser Extension**:
-   - In the dashboard, click **Pair Browser** &rarr; **Generate 6-Digit Code**.
-   - In your browser, open the KidSafe AI extension popup, unlock with PIN (`1234`), go to **Settings**, enter the 6-digit code, and click **Connect**.
+   - Visit: `http://localhost:8000`
+   - Log in or create a parent account.
+   - Use the **AI Assistant** tab or command bar to set rules via natural language!
+3. **Load the Extension**:
+   - Open Chrome/Edge/Brave &rarr; `chrome://extensions` &rarr; Developer mode &rarr; **Load unpacked** &rarr; select `C:\CHILDSAFE\extension`.
+   - Pair with the 6-digit code from the dashboard.
 
 ---
 
-## 🧪 Automated Test Suites
+## 🧪 Comprehensive Automated Test Suites
 
-- **Extension Core Tests (Phase 1)**:
-  ```powershell
-  node tests/test_extension_core.js
-  ```
-- **Backend & Pairing Tests (Phase 2)**:
-  ```powershell
-  python tests/test_phase2_backend.py
-  ```
+Run all three test suites:
+```powershell
+# Phase 1: Extension Core & Policy Pipeline
+node tests/test_extension_core.js
+
+# Phase 2: Backend, JWT Auth, Pairing & Sync
+python tests/test_phase2_backend.py
+
+# Phase 3: AI Classifier Agent & Natural Language Parent Agent
+python tests/test_phase3_ai.py
+```
 
 ---
 
-## 🔮 Next: Phase 3
-- **AI Agent Integration**:
-  - LLM Page Classifier Agent (`allow` | `block` | `ask_parent`) for unclassified domains using extracted DOM metadata.
-  - Plain-language child explanations generated by AI.
-  - Natural-language rule assistant for parents.
+## 🔮 Next: Phase 4
+- **Extension Hardening & Evaluation**:
+  - Bypass resistance testing (Incognito lockout enforcement, enterprise policies).
+  - Accuracy, latency, and classifier benchmark dataset.

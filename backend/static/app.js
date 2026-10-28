@@ -56,6 +56,7 @@ function setupNavListeners() {
         viewProfiles: "Child Profiles",
         viewApprovals: "Approval Requests",
         viewRules: "Custom Web Rules",
+        viewAIAssistant: "AI Agent Assistant",
         viewPairing: "Pair Browser Extension",
         viewLogs: "Activity & Safety Logs"
       };
@@ -222,6 +223,9 @@ function setupActionListeners() {
       console.error("Add rule error:", err);
     }
   });
+
+  // Setup AI Assistant Listeners
+  setupAIAssistant();
 
   // Refresh Logs
   document.getElementById("btnRefreshLogs")?.addEventListener("click", () => {
@@ -554,4 +558,158 @@ function escapeHtml(str) {
     '"': "&quot;",
     "'": "&#39;"
   }[m]));
+}
+
+// Phase 3: AI Agent Assistant UI Logic
+function setupAIAssistant() {
+  // 1. Overview AI quick command
+  const btnOverviewAi = document.getElementById("btnOverviewAiSend");
+  const inputOverviewAi = document.getElementById("overviewAiInput");
+  const previewOverviewBox = document.getElementById("overviewAiPreviewBox");
+
+  btnOverviewAi?.addEventListener("click", async () => {
+    const text = inputOverviewAi.value.trim();
+    if (!text || !activeProfileId) return;
+    await handleAiPreview(text, previewOverviewBox, btnOverviewAi);
+  });
+
+  // 2. Full Assistant Tab
+  const btnAssistantSend = document.getElementById("btnAssistantSend");
+  const inputAssistant = document.getElementById("assistantInput");
+  const previewAssistantBox = document.getElementById("assistantPreviewContainer");
+
+  btnAssistantSend?.addEventListener("click", async () => {
+    const text = inputAssistant.value.trim();
+    if (!text || !activeProfileId) return;
+    await handleAiPreview(text, previewAssistantBox, btnAssistantSend);
+  });
+
+  // Example prompt chips
+  document.querySelectorAll(".chip-btn").forEach(chip => {
+    chip.addEventListener("click", () => {
+      inputAssistant.value = chip.dataset.prompt;
+      btnAssistantSend.click();
+    });
+  });
+
+  // 3. AI Classifier URL Inspector
+  const btnInspect = document.getElementById("btnRunClassification");
+  const inputInspectUrl = document.getElementById("testClassifyUrl");
+  const resultBox = document.getElementById("classifierResultBox");
+
+  btnInspect?.addEventListener("click", async () => {
+    const url = inputInspectUrl.value.trim();
+    if (!url) return;
+
+    btnInspect.disabled = true;
+    btnInspect.textContent = "Analyzing...";
+
+    try {
+      const profile = profiles.find(p => p.id === activeProfileId);
+      const res = await fetch(\/api/ai/classify, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          url,
+          age_profile: profile ? profile.tier : "junior"
+        })
+      });
+      const data = await res.json();
+
+      resultBox.innerHTML = 
+        <div class="class-row"><strong>Verdict:</strong> <span class="status-badge \">\</span></div>
+        <div class="class-row"><strong>Confidence:</strong> <span>\%</span></div>
+        <div class="class-row"><strong>Age Rating:</strong> <span>\</span></div>
+        <div class="class-row"><strong>Categories:</strong> <span>\</span></div>
+        <div class="class-row" style="margin-top:6px;"><strong>Parent Explanation:</strong> <span>\</span></div>
+        <div class="class-row"><strong>Child Friendly Note:</strong> <span>\</span></div>
+      ;
+      resultBox.classList.remove("hidden");
+    } catch (err) {
+      resultBox.innerHTML = <span style="color:#dc2626;">Classification failed.</span>;
+      resultBox.classList.remove("hidden");
+    } finally {
+      btnInspect.disabled = false;
+      btnInspect.textContent = "Inspect URL";
+    }
+  });
+}
+
+async function handleAiPreview(instruction, container, btnTrigger) {
+  if (!container || !activeProfileId) return;
+
+  btnTrigger.disabled = true;
+  btnTrigger.textContent = "Agent Thinking...";
+
+  try {
+    const res = await fetch(\/api/ai/nl-rule/preview, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": Bearer \
+      },
+      body: JSON.stringify({
+        profile_id: activeProfileId,
+        instruction
+      })
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      container.innerHTML = <div style="color:#dc2626;font-size:13px;">\</div>;
+      container.classList.remove("hidden");
+      return;
+    }
+
+    let itemsHtml = data.actions.map(a => <li>\</li>).join("");
+
+    container.innerHTML = 
+      <div class="preview-header">
+        <h4>Proposed Policy Changes for \:</h4>
+        <span class="status-badge pending">Confirmation Needed</span>
+      </div>
+      <ul class="preview-actions-list">\</ul>
+      <div class="preview-btn-row">
+        <button class="btn btn-secondary btn-sm" id="btnCancelAiPreview">Cancel</button>
+        <button class="btn btn-primary btn-sm" id="btnConfirmAiAction">Confirm & Apply</button>
+      </div>
+    ;
+    container.classList.remove("hidden");
+
+    container.querySelector("#btnCancelAiPreview").addEventListener("click", () => {
+      container.classList.add("hidden");
+    });
+
+    container.querySelector("#btnConfirmAiAction").addEventListener("click", async () => {
+      const confirmBtn = container.querySelector("#btnConfirmAiAction");
+      confirmBtn.disabled = true;
+      confirmBtn.textContent = "Applying...";
+
+      const confRes = await fetch(\/api/ai/nl-rule/confirm, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": Bearer \
+        },
+        body: JSON.stringify({
+          profile_id: activeProfileId,
+          actions: data.actions
+        })
+      });
+
+      if (confRes.ok) {
+        container.innerHTML = <div style="color:#16a34a;font-weight:600;font-size:13px;">Changes applied successfully by AI Agent!</div>;
+        setTimeout(() => {
+          container.classList.add("hidden");
+          loadDashboardData();
+        }, 1500);
+      }
+    });
+  } catch (err) {
+    container.innerHTML = <div style="color:#dc2626;font-size:13px;">Failed to reach AI Agent.</div>;
+    container.classList.remove("hidden");
+  } finally {
+    btnTrigger.disabled = false;
+    btnTrigger.textContent = btnTrigger.id.includes("Overview") ? "Ask AI Agent" : "Preview Changes";
+  }
 }

@@ -25,3 +25,8 @@ _metadata/
 # SQLite databases
 *.db
 *.sqlite3
+
+# Project internal reports
+COMPLETION_REPORT.md
+PROJECT_OVERVIEW.md
+

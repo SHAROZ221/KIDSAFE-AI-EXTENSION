@@ -8,10 +8,10 @@ let profiles = [];
 let activeProfileId = null;
 
 document.addEventListener("DOMContentLoaded", () => {
-  initAuthUI();
   setupNavListeners();
   setupAuthFormListeners();
   setupActionListeners();
+  setupAIAssistant();
 
   if (authToken) {
     showDashboard();
@@ -71,11 +71,11 @@ function setupNavListeners() {
   });
 
   document.getElementById("btnViewAllApprovals")?.addEventListener("click", () => {
-    document.querySelector('.nav-item[data-view="viewApprovals"]').click();
+    document.querySelector('.nav-item[data-view="viewApprovals"]')?.click();
   });
 
   document.getElementById("btnQuickPairModal")?.addEventListener("click", () => {
-    document.querySelector('.nav-item[data-view="viewPairing"]').click();
+    document.querySelector('.nav-item[data-view="viewPairing"]')?.click();
   });
 
   document.getElementById("childProfileSelector")?.addEventListener("change", (e) => {
@@ -94,21 +94,25 @@ function setupAuthFormListeners() {
   const loginForm = document.getElementById("loginForm");
   const registerForm = document.getElementById("registerForm");
 
-  tabLoginBtn.addEventListener("click", () => {
+  // Tab switching: Sign In vs Create Account
+  tabLoginBtn?.addEventListener("click", (e) => {
+    e.preventDefault();
     tabLoginBtn.classList.add("active");
     tabRegisterBtn.classList.remove("active");
     loginForm.classList.remove("hidden");
     registerForm.classList.add("hidden");
   });
 
-  tabRegisterBtn.addEventListener("click", () => {
+  tabRegisterBtn?.addEventListener("click", (e) => {
+    e.preventDefault();
     tabRegisterBtn.classList.add("active");
     tabLoginBtn.classList.remove("active");
     registerForm.classList.remove("hidden");
     loginForm.classList.add("hidden");
   });
 
-  loginForm.addEventListener("submit", async (e) => {
+  // Login submission
+  loginForm?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const email = document.getElementById("loginEmail").value.trim();
     const password = document.getElementById("loginPassword").value;
@@ -133,7 +137,8 @@ function setupAuthFormListeners() {
     }
   });
 
-  registerForm.addEventListener("submit", async (e) => {
+  // Register submission
+  registerForm?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const full_name = document.getElementById("regName").value.trim();
     const email = document.getElementById("regEmail").value.trim();
@@ -174,8 +179,6 @@ function setSession(token, parentData) {
   localStorage.setItem("kidsafe_token", token);
   localStorage.setItem("kidsafe_parent", JSON.stringify(parentData));
 }
-
-function initAuthUI() {}
 
 // Action Listeners
 function setupActionListeners() {
@@ -223,9 +226,6 @@ function setupActionListeners() {
       console.error("Add rule error:", err);
     }
   });
-
-  // Setup AI Assistant Listeners
-  setupAIAssistant();
 
   // Refresh Logs
   document.getElementById("btnRefreshLogs")?.addEventListener("click", () => {
@@ -387,7 +387,6 @@ function renderApprovalsTable(container, list) {
   html += `</tbody></table>`;
   container.innerHTML = html;
 
-  // Listeners
   container.querySelectorAll(".btn-approve-req").forEach(b => {
     b.addEventListener("click", async () => {
       await fetch(`${API_BASE}/api/requests/${b.dataset.id}/approve`, {
@@ -540,26 +539,6 @@ async function loadLogs() {
   }
 }
 
-function formatTier(tier) {
-  const map = {
-    little_explorer: "Little Explorer (5–8)",
-    junior: "Junior (9–12)",
-    teen: "Teen (13–17)"
-  };
-  return map[tier] || tier;
-}
-
-function escapeHtml(str) {
-  if (!str) return "";
-  return str.replace(/[&<>"']/g, m => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#39;"
-  }[m]));
-}
-
 // Phase 3: AI Agent Assistant UI Logic
 function setupAIAssistant() {
   // 1. Overview AI quick command
@@ -606,7 +585,7 @@ function setupAIAssistant() {
 
     try {
       const profile = profiles.find(p => p.id === activeProfileId);
-      const res = await fetch(\/api/ai/classify, {
+      const res = await fetch(`${API_BASE}/api/ai/classify`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -616,17 +595,17 @@ function setupAIAssistant() {
       });
       const data = await res.json();
 
-      resultBox.innerHTML = 
-        <div class="class-row"><strong>Verdict:</strong> <span class="status-badge \">\</span></div>
-        <div class="class-row"><strong>Confidence:</strong> <span>\%</span></div>
-        <div class="class-row"><strong>Age Rating:</strong> <span>\</span></div>
-        <div class="class-row"><strong>Categories:</strong> <span>\</span></div>
-        <div class="class-row" style="margin-top:6px;"><strong>Parent Explanation:</strong> <span>\</span></div>
-        <div class="class-row"><strong>Child Friendly Note:</strong> <span>\</span></div>
-      ;
+      resultBox.innerHTML = `
+        <div class="class-row"><strong>Verdict:</strong> <span class="status-badge ${data.verdict}">${data.verdict.toUpperCase()}</span></div>
+        <div class="class-row"><strong>Confidence:</strong> <span>${(data.confidence * 100).toFixed(0)}%</span></div>
+        <div class="class-row"><strong>Age Rating:</strong> <span>${data.age_rating}</span></div>
+        <div class="class-row"><strong>Categories:</strong> <span>${data.categories.join(", ")}</span></div>
+        <div class="class-row" style="margin-top:6px;"><strong>Parent Explanation:</strong> <span>${escapeHtml(data.reason_parent)}</span></div>
+        <div class="class-row"><strong>Child Friendly Note:</strong> <span>${escapeHtml(data.reason_child)}</span></div>
+      `;
       resultBox.classList.remove("hidden");
     } catch (err) {
-      resultBox.innerHTML = <span style="color:#dc2626;">Classification failed.</span>;
+      resultBox.innerHTML = `<span style="color:#dc2626;">Classification failed.</span>`;
       resultBox.classList.remove("hidden");
     } finally {
       btnInspect.disabled = false;
@@ -642,11 +621,11 @@ async function handleAiPreview(instruction, container, btnTrigger) {
   btnTrigger.textContent = "Agent Thinking...";
 
   try {
-    const res = await fetch(\/api/ai/nl-rule/preview, {
+    const res = await fetch(`${API_BASE}/api/ai/nl-rule/preview`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": Bearer \
+        "Authorization": `Bearer ${authToken}`
       },
       body: JSON.stringify({
         profile_id: activeProfileId,
@@ -656,40 +635,40 @@ async function handleAiPreview(instruction, container, btnTrigger) {
 
     const data = await res.json();
     if (!res.ok || !data.success) {
-      container.innerHTML = <div style="color:#dc2626;font-size:13px;">\</div>;
+      container.innerHTML = `<div style="color:#dc2626;font-size:13px;">${data.message || "Could not parse instruction."}</div>`;
       container.classList.remove("hidden");
       return;
     }
 
-    let itemsHtml = data.actions.map(a => <li>\</li>).join("");
+    let itemsHtml = data.actions.map(a => `<li>${escapeHtml(a.summary)}</li>`).join("");
 
-    container.innerHTML = 
+    container.innerHTML = `
       <div class="preview-header">
-        <h4>Proposed Policy Changes for \:</h4>
+        <h4>Proposed Policy Changes for ${escapeHtml(data.target_child)}:</h4>
         <span class="status-badge pending">Confirmation Needed</span>
       </div>
-      <ul class="preview-actions-list">\</ul>
+      <ul class="preview-actions-list">${itemsHtml}</ul>
       <div class="preview-btn-row">
         <button class="btn btn-secondary btn-sm" id="btnCancelAiPreview">Cancel</button>
         <button class="btn btn-primary btn-sm" id="btnConfirmAiAction">Confirm & Apply</button>
       </div>
-    ;
+    `;
     container.classList.remove("hidden");
 
-    container.querySelector("#btnCancelAiPreview").addEventListener("click", () => {
+    container.querySelector("#btnCancelAiPreview")?.addEventListener("click", () => {
       container.classList.add("hidden");
     });
 
-    container.querySelector("#btnConfirmAiAction").addEventListener("click", async () => {
+    container.querySelector("#btnConfirmAiAction")?.addEventListener("click", async () => {
       const confirmBtn = container.querySelector("#btnConfirmAiAction");
       confirmBtn.disabled = true;
       confirmBtn.textContent = "Applying...";
 
-      const confRes = await fetch(\/api/ai/nl-rule/confirm, {
+      const confRes = await fetch(`${API_BASE}/api/ai/nl-rule/confirm`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": Bearer \
+          "Authorization": `Bearer ${authToken}`
         },
         body: JSON.stringify({
           profile_id: activeProfileId,
@@ -698,7 +677,7 @@ async function handleAiPreview(instruction, container, btnTrigger) {
       });
 
       if (confRes.ok) {
-        container.innerHTML = <div style="color:#16a34a;font-weight:600;font-size:13px;">Changes applied successfully by AI Agent!</div>;
+        container.innerHTML = `<div style="color:#16a34a;font-weight:600;font-size:13px;">Changes applied successfully by AI Agent!</div>`;
         setTimeout(() => {
           container.classList.add("hidden");
           loadDashboardData();
@@ -706,10 +685,30 @@ async function handleAiPreview(instruction, container, btnTrigger) {
       }
     });
   } catch (err) {
-    container.innerHTML = <div style="color:#dc2626;font-size:13px;">Failed to reach AI Agent.</div>;
+    container.innerHTML = `<div style="color:#dc2626;font-size:13px;">Failed to reach AI Agent.</div>`;
     container.classList.remove("hidden");
   } finally {
     btnTrigger.disabled = false;
     btnTrigger.textContent = btnTrigger.id.includes("Overview") ? "Ask AI Agent" : "Preview Changes";
   }
+}
+
+function formatTier(tier) {
+  const map = {
+    little_explorer: "Little Explorer (5–8)",
+    junior: "Junior (9–12)",
+    teen: "Teen (13–17)"
+  };
+  return map[tier] || tier;
+}
+
+function escapeHtml(str) {
+  if (!str) return "";
+  return str.replace(/[&<>"']/g, m => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  }[m]));
 }
